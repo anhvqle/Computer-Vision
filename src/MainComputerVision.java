@@ -89,6 +89,24 @@ public class MainComputerVision
 			input.close();
 		}
 		
+		//average filtering
+		for (int i = 1; i < WIDTH-1; i++)
+			for (int j = 1; j < HEIGHT-1; j++)
+				pixels[i][j] = (orig_pixels[i-1][j-1] + orig_pixels[i-1][j] + orig_pixels[i-1][j+1]
+								+ orig_pixels[i][j-1] + orig_pixels[i][j] + orig_pixels[i][j+1]
+								+ orig_pixels[i+1][j-1] + orig_pixels[i+1][j] + orig_pixels[i+1][j+1])/9;
+
+		for(int i = 0; i < WIDTH; i++) {
+			for(int j = 0; j < HEIGHT; j++) {
+				if(i == 0 || i == pixels.length - 1)
+					pixels[i][j] = 255;
+				if(j == 0 || j == pixels[0].length - 1) {
+					pixels[i][j] = 255;
+				}
+			}
+		}
+		writeFile("average.pgm");
+		
 		
 		System.out.println("Done");
 	}
