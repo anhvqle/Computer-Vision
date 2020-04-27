@@ -88,7 +88,7 @@ public class MainComputerVision
 			}
 			input.close();
 		}
-		
+
 		//average filtering
 		for (int i = 1; i < WIDTH-1; i++)
 			for (int j = 1; j < HEIGHT-1; j++)
@@ -106,6 +106,35 @@ public class MainComputerVision
 			}
 		}
 		writeFile("average.pgm");
+
+		//median filtering
+		int [] array = new int [9];
+		for ( int i = 1; i < WIDTH-1; i++ )
+			for ( int j = 1; j < HEIGHT-1; j++ ) {
+				array[0] = orig_pixels[i-1][j-1];
+				array[1] = orig_pixels[i-1][j];
+				array[2] = orig_pixels[i-1][j+1];
+				array[3] = orig_pixels[i][j-1];
+				array[4] = orig_pixels[i][j];
+				array[5] = orig_pixels[i][j+1];
+				array[6] = orig_pixels[i+1][j-1]; 
+				array[7] = orig_pixels[i+1][j];
+				array[8] = orig_pixels[i+1][j+1];
+				
+				Arrays.sort(array);
+				int median = (int) array[4];
+				pixels[i][j] = median;
+			}
+
+		for(int i = 0; i < WIDTH; i++) {
+			for(int j = 0; j < HEIGHT; j++) {
+				if(i == 0 || i == WIDTH - 1)
+					pixels[i][j] = 255;
+				if(j == 0 || j == HEIGHT - 1) {
+					pixels[i][j] = 255;
+				}
+			}
+		}
 		
 		
 		System.out.println("Done");
