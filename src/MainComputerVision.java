@@ -11,29 +11,28 @@ public class MainComputerVision
 	
 	public static void writeFile( String file ) throws Exception
 	{
-		BufferedOutputStream writer = new BufferedOutputStream(new FileOutputStream(file));
+		DataOutputStream output = new DataOutputStream(new FileOutputStream(file));
+		output.write( 'P' );
+		output.write( '5' );
+		output.write( ' ' );
+		output.write( '1' );
+		output.write( '2' );
+		output.write( '8' );
+		output.write( ' ' );
+		output.write( '1' );
+		output.write( '2' );
+		output.write( '8' );
+		output.write( ' ' );
+		output.write( '2' );
+		output.write( '5' );
+		output.write( '5' );
+		output.write( ' ' );
 		
-		writer.write( 'P' );
-		writer.write( '5' );
-		writer.write( ' ' );
-		writer.write( '1' );
-		writer.write( '2' );
-		writer.write( '8' );
-		writer.write( ' ' );
-		writer.write( '1' );
-		writer.write( '2' );
-		writer.write( '8' );
-		writer.write( ' ' );
-		writer.write( '2' );
-		writer.write( '5' );
-		writer.write( '5' );
-		writer.write( ' ' );
-
 		for ( int i = 0; i < WIDTH; i++ ){
 			for ( int j = 0; j < HEIGHT; j++ )
-				writer.write(filtered[i][j]);
+				output.writeByte(filtered[i][j]);
 		}
-		writer.close();
+		output.close();
 	}
 	
 	public static void main(String[] args) throws Exception{		
