@@ -30,7 +30,7 @@ public class MainComputerVision
 		
 		for ( int i = 0; i < WIDTH; i++ ){
 			for ( int j = 0; j < HEIGHT; j++ )
-				output.writeByte(filtered[i][j]);
+				output.write(filtered[i][j]);
 		}
 		output.close();
 	}
