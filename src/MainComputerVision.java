@@ -108,6 +108,6 @@ public class MainComputerVision
 		}
 
 		writeFile("median.pgm");
-		System.out.println("Done");
+		System.out.println("Done - Check within project folder for filtered images");
 	}
 }
