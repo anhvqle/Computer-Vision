@@ -149,10 +149,6 @@ public class MainComputerVision
 		
 		/*------------------------Hough Transform---------------------------*/
 
-<<<<<<< HEAD
-=======
-		writeFile("median.pgm");
->>>>>>> d7e78376016cc9c128b9a17a4794404681c77cde
 		System.out.println("Done - Check within project folder for filtered images");
 	}
 }
