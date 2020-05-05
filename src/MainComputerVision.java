@@ -6,9 +6,10 @@ public class MainComputerVision
 	private static int WIDTH = 128;			//Default width is 128 pixel
 	private static int HEIGHT = 128;		//Default height is 128 pixel
 	
-	private static int[][] original;
-	private static int[][] filtered;
+	private static int[][] original = new int[WIDTH][HEIGHT];
+	private static int[][] filtered = new int[WIDTH][HEIGHT];
 	
+	//WriteFile method to output a PGM file
 	public static void writeFile( String file ) throws Exception
 	{
 		DataOutputStream output = new DataOutputStream(new FileOutputStream(file));
@@ -30,18 +31,38 @@ public class MainComputerVision
 		
 		for ( int i = 0; i < WIDTH; i++ ){
 			for ( int j = 0; j < HEIGHT; j++ )
-				output.writeByte(filtered[i][j]);
+				output.write(filtered[i][j]);
 		}
 		output.close();
 	}
 	
-	public static void main(String[] args) throws Exception{		
+	public static void main(String[] args) throws Exception{	
 		System.out.println("Please enter a file name: ");
 		Scanner input = new Scanner(System.in);
 		String fileName = input.nextLine();
 		input.close();
 		DataInputStream newInput = null;
+	
+		String format;
+		int width, height, maxIntensity;
+		
+		//Get the file format, dimensions, and max intensity
+		Scanner scan = null;
+		try {
+			scan = new Scanner(new FileReader(fileName));
+		}
+		catch(FileNotFoundException e){
+			System.out.println("Invalid files");
+			System.exit(1);
+		}
+		
+		format = scan.next();
+		width = scan.nextInt();
+		height = scan.nextInt();
+		maxIntensity = scan.nextInt();
+		scan.close();
 
+		//Read in unsigned bytes
 		try{
 			newInput = new DataInputStream(new FileInputStream(fileName));
 		}
@@ -49,35 +70,25 @@ public class MainComputerVision
 			System.out.println("Invalid file");
 			System.exit(1);
 		}
-		original = new int[WIDTH][HEIGHT];
-		filtered = new int[WIDTH][HEIGHT];
 
 		for (int i = 0; i < WIDTH; i++){
-			for (int j = 0; j < HEIGHT; j++)
+			for (int j = 0; j < HEIGHT; j++) {
 				original[i][j] = newInput.readUnsignedByte();
-		}
-		input.close();		
-		
-		//Average filtering
-		for (int i = 1; i < WIDTH-1; i++)
-			for (int j = 1; j < HEIGHT-1; j++)
-				filtered[i][j] = (original[i-1][j-1] + original[i-1][j] + original[i-1][j+1]
-								+ original[i][j-1] + original[i][j] + original[i][j+1]
-								+ original[i+1][j-1] + original[i+1][j] + original[i+1][j+1])/9;
-
-		//Fill the edge pixels with 255
-		for(int i = 0; i < WIDTH; i++) {
-			for(int j = 0; j < HEIGHT; j++) {
-				if(i == 0 || i == filtered.length - 1)
-					filtered[i][j] = 255;
-				if(j == 0 || j == filtered[0].length - 1) {
-					filtered[i][j] = 255;
-				}
 			}
 		}
+		newInput.close();		
+		
+		/*-------------------------Average Filtering-------------------------*/
+		for (int i = 1; i < WIDTH-1; i++) {
+			for (int j = 1; j < HEIGHT-1; j++) {
+				filtered[i][j] = (original[i-1][j-1] + original[i-1][j] + original[i-1][j+1] + original[i][j-1] + original[i][j] 
+						+ original[i][j+1] + original[i+1][j-1] + original[i+1][j] + original[i+1][j+1])/9;
+			}
+		}
+
 		writeFile("average.pgm");
 		
-		//Median filtering
+		/*-------------------------Median Filtering--------------------------*/
 		int [] array = new int [9];
 		for ( int i = 1; i < WIDTH-1; i++ ) {
 			for ( int j = 1; j < HEIGHT-1; j++ ) {
@@ -96,18 +107,48 @@ public class MainComputerVision
 			}
 		}
 
-		//Fill the edge pixels with 255
-		for(int i = 0; i < WIDTH; i++) {
+		writeFile("median.pgm");
+		
+		/*-------------------------Edge Detection---------------------------*/
+		
+		int[][] deltaX = new int[WIDTH][HEIGHT];
+		int[][] deltaY = new int[WIDTH][HEIGHT];
+		int[][] magnitude = new int[WIDTH][HEIGHT];
+		
+		//Compute deltaX, deltaY, and Magnitude 2D Arrays
+		for(int i = 0; i < WIDTH; i++){
 			for(int j = 0; j < HEIGHT; j++) {
-				if(i == 0 || i == WIDTH - 1)
-					filtered[i][j] = 255;
-				if(j == 0 || j == HEIGHT - 1) {
-					filtered[i][j] = 255;
+				if (i==0 || j==0 || i == WIDTH -1 || j == HEIGHT -1)
+				{
+					deltaX[i][j] = deltaY[i][j] = 0;
+					magnitude[i][j] = 0;
+				}
+				else
+				{
+					deltaX[i][j] = original[i-1][j+1] + original[i][j+1] + original[i+1][j+1] - (original[i-1][j-1] + original[i][j-1] + original[i+1][j-1]);
+					deltaY[i][j] = original[i-1][j-1] + original[i-1][j] + original[i-1][j+1] - (original[i+1][j-1] + original[i+1][j] + original[i+1][j+1]);
+					magnitude[i][j] = (int)(Math.sqrt(deltaX[i][j] * deltaX[i][j] + deltaY[i][j] * deltaY[i][j]));
 				}
 			}
 		}
+		
+		//Compute the Threshold
+		int threshold = Integer.MIN_VALUE;
+		
+		//Fill the edge pixels with 255
+		for(int i = 0; i < WIDTH; i++) {
+			for(int j = 0; j < HEIGHT; j++) {
+				if(magnitude[i][j] >= threshold)
+					filtered[i][j] = 255;
+				else
+					filtered[i][j] = 0;
+			}
+		}
+				
+		writeFile("edge.pgm");
+		
+		/*------------------------Hough Transform---------------------------*/
 
-		writeFile("median.pgm");
-		System.out.println("Done");
+		System.out.println("Done - Check within project folder for filtered images");
 	}
 }
