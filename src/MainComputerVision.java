@@ -8,7 +8,8 @@ public class MainComputerVision
 	
 	private static int[][] original = new int[WIDTH][HEIGHT];
 	private static int[][] filtered = new int[WIDTH][HEIGHT];
-	private static int[][] accumulator = new int[WIDTH][HEIGHT];
+	private static int[][] verticalAccumulator = new int[WIDTH][HEIGHT];
+	private static int[][] horizontalAccumulator = new int[WIDTH][HEIGHT];
 	
 	//WriteFile method to output a PGM file
 	public static void writeFile( String file ) throws Exception
@@ -145,13 +146,14 @@ public class MainComputerVision
 		writeFile("edge.pgm");
 		
 		/*-------------------------Hough Transform----------------------------*/
+		//Vertical Lines
 		for(int x = 0; x < WIDTH; x++) {
 			for(int y = 0; y < HEIGHT; y++) {
 				if(filtered[x][y] != 0) {
 					for(int m = 0; m < WIDTH; m++) {
 						for(int b = 0; b < HEIGHT; b++) {
-							if(b == y - m*x || b == x*m - y)
-								accumulator[m][b] += 1;
+							if(b == y - m*x)
+								verticalAccumulator[m][b] += 1;
 						}
 					}
 				}
@@ -159,12 +161,12 @@ public class MainComputerVision
 		}
 		int maxB = 0;
 		int maxM = 0;
-		int max = accumulator[0][0];
-		for(int i = 0; i < 5; i++) {
+		int max = verticalAccumulator[0][0];
+		for(int i = 0; i < 6; i++) {
 			for(int m = 0; m < WIDTH; m++) {
 				for(int b = 0; b < HEIGHT; b++) {
-					if(accumulator[m][b] > max) {
-						max = accumulator[m][b];
+					if(verticalAccumulator[m][b] > max) {
+						max = verticalAccumulator[m][b];
 						maxM = m;
 						maxB = b;
 					}
@@ -172,15 +174,50 @@ public class MainComputerVision
 			}
 			for(int x = 0; x < WIDTH; x++) {
 				for(int y = 0; y < HEIGHT; y++) {
-					if(y == maxM*x + maxB || x == maxM*y + maxB)
+					if(y == maxM*x + maxB)
 						filtered[x][y] = 255;
 				}
 			}
-			max = accumulator[maxM][maxB] = 0;
+			max = verticalAccumulator[maxM][maxB] = 0;
+		}		
+		
+		//Horizontal Lines
+		for(int x = 0; x < WIDTH; x++) {
+			for(int y = 0; y < HEIGHT; y++) {
+				if(filtered[x][y] != 0) {
+					for(int m = 0; m < WIDTH; m++) {
+						for(int b = 0; b < HEIGHT; b++) {
+							if(b == x - m*y)
+								horizontalAccumulator[m][b] += 1;
+						}
+					}
+				}
+			}
+		}
+		maxB = 0;
+		maxM = 0;
+		max = horizontalAccumulator[0][0];
+		for(int i = 0; i < 6; i++) {
+			for(int m = 0; m < WIDTH; m++) {
+				for(int b = 0; b < HEIGHT; b++) {
+					if(horizontalAccumulator[m][b] > max) {
+						max = horizontalAccumulator[m][b];
+						maxM = m;
+						maxB = b;
+					}
+				}
+			}
+			for(int x = 0; x < WIDTH; x++) {
+				for(int y = 0; y < HEIGHT; y++) {
+					if(x == y * maxM + maxB)
+						filtered[x][y] = 255;
+				}
+			}
+			max = horizontalAccumulator[maxM][maxB] = 0;
 		}		
 
 		writeFile("lines.pgm");
-		
+
 		System.out.println("Done - Check within project folder for filtered images");
 	}
 }
